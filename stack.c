@@ -1,81 +1,84 @@
-#include <stdio.h>
 #include <stdlib.h>
-#include "stackS.c"
-#include <string.h>
 
-char expressao[310];
-char saida[310];
-int tam;
-int i;
-char c;
-int pos = 0;
+//Tipo de dado que a pilha ira armazenar
+typedef char tipoDado;
 
-int prioridade(char c){
-	switch(c){
-		case ')': 
-			return 0;
-			break;
-		case '+': case '-':
-			return 1;
-			break;
-		case '*': case '/':
-			return 2;
-			break;
-		case '^':
-			return 3;
-			break;
-		case '(':
-			return 4;
-			break;
-		default:
-			return -1;
-	}
+typedef struct{
+	tipoDado dado;
+	struct Node *prox;
+	struct Node *ant;
+}Node;
+
+typedef struct{
+	int tam;
+	int tamMax;
+	Node *topo;
+}Pilha;
+
+
+void init(Pilha * pilha, int tamMax){
+	pilha->topo = NULL;
+	pilha->tam = 0;
+	pilha->tamMax = tamMax;
 }
 
-void operando(char c){
-	saida[pos++] = c;
+Pilha * criaPilha(){
+	Pilha *pilha = (Pilha *)malloc(sizeof(Pilha));
+	return pilha;
 }
 
-void operador(Pilha * pilha, char c){
-	int pPilha = prioridade(topo(pilha));
-	int pExpressao = prioridade(c);
-	
-	if(pPilha != -1){
-		if(pExpressao < pPilha){
-			while(!isEmpty(pilha) || topo(pilha) == '('){
-				operando(topo(pilha));
-				pop(pilha);
-			}
-		}
-	}
-	push(pilha, c);
-}
-
-int main(){
-		
-	Pilha *pilha = criaPilha();
-	init(pilha, -1);
-
-	scanf("%s", expressao);
-
-	tam = strlen(expressao);
-
-	for(i = 0; i < tam; i++){
-		c = expressao[i];
-		if(prioridade(c) == -1)
-			operando(c);
-		else
-			operador(pilha, c);		
-	}
-	
-	while(!isEmpty(pilha)){
-		saida[pos++] = topo(pilha);
-		pop(pilha);
-	}
-
-	expressao[pos] = '\0';
-
-	printf("%s\n", saida);
-
+int isEmpty(Pilha * pilha){
+	if(pilha->topo == NULL)
+		return 1;
 	return 0;
+}
+
+Node * criaNode(tipoDado dado){
+	Node *node = (Node *)malloc(sizeof(Node));
+	node->dado = dado;
+	return node;
+}
+
+int isFull(Pilha * pilha){
+	if(pilha->tamMax == pilha->tam)
+		return 1;
+	return 0;
+}
+
+int push(Pilha *pilha, tipoDado dado){
+	if(!isFull(pilha)){
+		Node *node = criaNode(dado);
+		if(isEmpty(pilha))
+			node->ant = NULL;
+		else
+			node->ant = pilha->topo;
+		node->prox = NULL;
+		pilha->topo = node;
+		pilha->tam++;
+		return 1;
+	}
+	return 0;
+}
+
+tipoDado topo(Pilha * pilha){
+	if(pilha->topo == NULL)
+		return ' ';
+	Node *node = pilha->topo;
+	return node->dado;
+}
+
+int pop(Pilha * pilha){
+	if(!isEmpty(pilha)){
+		Node *node = pilha->topo;
+		pilha->topo = node->ant;
+		free(node->prox);
+		node->prox = NULL;
+		pilha->tam--;
+		return 1;
+	}
+	return 0;
+}
+
+void showStack(Pilha * pilha){
+	
 }
